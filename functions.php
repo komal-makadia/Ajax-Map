@@ -353,17 +353,16 @@ add_shortcode('google_map_by_address', 'google_map_by_address_shortcode');
  * Display Google Map using AJAX in WordPress with API Key from wp-config.php
  */
 function google_map_by_api_shortcode() {
-    ob_start();
-    ?>
-    <div id="map-form">
-        <input type="text" id="address-api" placeholder="Enter Address, City, State, Country" style="width: 300px; padding: 5px;" />
-        <button id="load-map-api" style="padding: 5px 10px;">Load Map</button>
-    </div>
-    <div id="map-container-api" style="width: 100%; height: 400px; margin-top: 20px; border: 1px solid #ccc;"></div>
-    <?php
-	echo $api_key = MY_API_KEY;
-    return ob_get_clean();
+
+    // HTML for the form and map container (echoed directly)
+    echo '<div id="map-form">';
+    echo '<input type="text" id="address-api" placeholder="Enter Address, City, State, Country" style="width: 300px; padding: 5px;" />';
+    echo '<button id="load-map-api" style="padding: 5px 10px;">Load Map</button>';
+    echo '</div>';
+    echo '<div id="map-container-api" style="width: 100%; height: 400px; margin-top: 20px; border: 1px solid #ccc;"></div>';
+
 }
+
 add_shortcode('google_map_by_api', 'google_map_by_api_shortcode');
 
 function ajax_load_google_map_by_api() {
