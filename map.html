@@ -131,3 +131,84 @@
   </script>
 </body>
 </html>
+
+
+ echo '<div class="form-group form-border distance_miles">';
+    echo '<select name="city_dropdown" id="city_dropdown" class="city-dropdown input-border">';
+    echo '<option value="">Select a City</option>'; // Default option
+
+    // Loop through the cities and add each one as an option
+    foreach ($cities as $city) {
+        echo '<option value="' . esc_attr($city) . '">' . esc_html($city) . '</option>';
+    }
+
+    echo '</select>';
+    echo '</div>';
+    
+    echo '<div class="form-group form-border distance_miles">';
+    echo '<select name="state_dropdown" id="state_dropdown" class="state-dropdown input-border">';
+    echo '<option value="">Select a State</option>'; // Default option
+
+    // Loop through the cities and add each one as an option
+    foreach ($states as $state) {
+        echo '<option value="' . esc_attr($state) . '">' . esc_html($state) . '</option>';
+    }
+
+    echo '</select>';
+    echo '</div>';
+    
+    echo '<div class="form-group form-border distance_miles">';
+    echo '<select name="zip_dropdown" id="state_dropdown" class="z-dropdown input-border">';
+    echo '<option value="">Select a Zipcode</option>'; // Default option
+
+    // Loop through the cities and add each one as an option
+    foreach ($zip_codes as $zip_code) {
+        echo '<option value="' . esc_attr($zip_code) . '">' . esc_html($zip_code) . '</option>';
+    }
+
+    echo '</select>';
+    echo '</div>';
+    $args = array(
+        'post_type' => 'dealers', // Custom Post Type for service centers
+        'posts_per_page' => -1, // Get all posts
+        'post_status' => 'publish', // Only published posts
+    );
+
+    // Run the query
+    $query = new WP_Query($args);
+
+    // Initialize an empty array to store cities
+    $cities = array();
+    $states = array();
+    $zip_codes = array();
+
+    // Loop through the posts to get the 'city' field from ACF
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+
+            // Get the city from ACF (assuming the ACF field is named 'city')
+            $city = get_field('city');
+            $state = get_field('state');
+            $zip_code = get_field('zip_code');
+            
+            // If city is not empty, add it to the array
+            if ($city && !in_array($city, $cities)) {
+                $cities[] = $city;
+            }
+            if ($state && !in_array($state, $states)) {
+                $states[] = $state;
+            }
+            if ($zip_code && !in_array($zip_code, $zip_codes)) {
+                $zip_codes[] = $zip_code;
+            }
+        }
+    }
+
+    // Reset post data
+    wp_reset_postdata();
+
+    // If no cities are found, return a message
+    if (empty($cities)) {
+        return 'No cities available.';
+    }
