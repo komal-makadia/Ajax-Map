@@ -1,0 +1,133 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <title>Google Maps API Key Test</title>
+</head>
+<body>
+  <div id="map" style="width: 400px; height: 300px;"></div>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9bMgiY8WZca1N0K29fUS_V9Gvv81oNKU"></script>
+  <script>
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 23.022505, lng: 72.571365 },
+        zoom: 13,
+      });
+    }
+    initMap();
+  </script>
+</body>
+</html> -->
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps Geocoding Example</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9bMgiY8WZca1N0K29fUS_V9Gvv81oNKU&libraries=places&callback=initMap"></script>
+</head>
+<body>
+    <div id="map" style="width: 400px; height: 300px;"></div>
+
+    <script>
+        function initMap() {
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({'address': 'New York'}, function(results, status) {
+              if (status === 'OK') {
+                            map.setCenter(results[0].geometry.location);
+                            var marker = new google.maps.Marker({
+                                map: map,
+                                position: results[0].geometry.location
+                            });
+                        } else {
+                            alert('Geocode was not successful for the following reason: ' + status);
+                        }
+            });
+        }
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Address Autocomplete</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9bMgiY8WZca1N0K29fUS_V9Gvv81oNKU&libraries=places&callback=initAutocomplete"></script>
+  <style>
+    #pac-container {
+      position: relative;
+      overflow: hidden;
+      background-color: #fff;
+      z-index: 1;
+      width: 300px;
+    }
+
+    #pac-input {
+      background-color: #fff;
+      font-size: 15px;
+      font-weight: 200;
+      height: 30px;
+      margin-left: 2px;
+      padding: 0 8px 0 10px;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+
+    #pac-container > input {
+      background-color: #fff;
+      font-size: 15px;
+      font-weight: 200;
+      height: 30px;
+      margin-left: 2px;
+      padding: 0 8px 0 10px;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+
+    #pac-container > div {
+      margin-top: 2px;
+      padding: 5px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      font-size: 13px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <input id="pac-input" type="text" placeholder="Search for places...">
+  <div id="pac-container"></div>
+  <script>
+    function initAutocomplete() {
+      const map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: -33.8688, lng: 151.2093 },
+        zoom: 13,
+      });
+
+      const input = document.getElementById("pac-input");
+      const autocomplete = new google.maps.places.Autocomplete(input);
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+
+        if (!place.geometry) {
+          window.alert("No details available for input: '" + place.name + "'");
+          return;
+        }
+
+        if (place.geometry.viewport) {
+          map.fitBounds(place.geometry.viewport);
+        } else {
+          map.setCenter(place.geometry.location);
+          map.setZoom(17); // Zoom to the selected place
+        }
+
+        const marker = new google.maps.Marker({
+          position: place.geometry.location,
+          map: map,
+        });
+      });
+    }
+  </script>
+</body>
+</html>
