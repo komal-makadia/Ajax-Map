@@ -212,3 +212,85 @@
     if (empty($cities)) {
         return 'No cities available.';
     }
+
+jQuery(document).ready(function ($) {
+    
+      let map;
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('serviceMap'), {
+            center: { lat: 20.5937, lng: 78.9629 }, // India coordinates
+            zoom: 6,
+        });
+    }
+    
+    window.onload = initMap;
+    
+    $('#mapSearchBtn').on('click', function (e) {
+        e.preventDefault();
+
+        var addressAPI = $('#search-input').val();
+       
+        if (!addressAPI) {
+            alert('Please enter a valid address.');
+            return;
+        }
+
+        $.ajax({
+            url: ajax_map_params.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'load_google_map_by_api',
+                addressAPI: addressAPI,
+            },
+            success: function (response) {
+                if (response.success && response.data.markers) {
+                    // Clear the previous map content and dealer list
+                    $('#map-container').html('');
+                    $('#map-container').html(response.data.dealer_list_html);
+
+                    // Initialize the map
+                    var map = new google.maps.Map(document.getElementById('serviceMap'), {
+                        center: { lat: 20.5937, lng: 78.9629 }, // India coordinates
+                        zoom: 6,
+                    });
+
+                    // Loop through markers and add each marker to the map
+                    var markers = response.data.markers;
+                    markers.forEach(function (markerData) {
+                        var position = { lat: parseFloat(markerData.lat), lng: parseFloat(markerData.lng) };
+
+                        // Create a new marker
+                        var marker = new google.maps.Marker({
+                            position: position,
+                            map: map,
+                            title: markerData.title,
+                        });
+
+                        // Add an info window to the marker
+                        var infowindow = new google.maps.InfoWindow({
+                            content: '<strong>' + markerData.title + '</strong><br>' +
+                                     'Address: ' + markerData.address + '<br>' +
+                                     'City: ' + markerData.city + '<br>' +
+                                     'State: ' + markerData.state,
+                        });
+
+                        // Open the info window when the marker is clicked
+                        marker.addListener('click', function () {
+                            infowindow.open(map, marker);
+                        });
+                        
+                        markers.forEach(dealer => {
+                const distance = calculateDistance(parseFloat(markerData.lat), parseFloat(markerData.lng), markers.lat, markers.lng);
+                console.log(markers.title + ' - ' + distance.toFixed(2) + ' miles');
+            });
+                    });
+                } else {
+                    alert(response.data || 'Failed to load markers.');
+                }
+            },
+            error: function () {
+                alert('Error loading map.');
+            },
+        });
+    });
+});
