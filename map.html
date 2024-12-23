@@ -294,3 +294,114 @@ jQuery(document).ready(function ($) {
         });
     });
 });
+
+function ajax_load_google_map_by_api() {
+    // Get the address or city name to search
+    $addressAPI = isset($_POST['addressAPI']) ? sanitize_text_field($_POST['addressAPI']) : '';
+
+    if (empty($addressAPI)) {
+        wp_send_json_error('Address is required.');
+    }
+
+    // Default query args for fetching service centers
+    $args = array(
+        'post_type' => 'dealers', // Custom Post Type for service centers
+        'posts_per_page' => -1, // Fetch all service centers
+        'post_status' => 'publish', // Only published posts
+    );
+
+    // Set up the meta query to search across multiple fields (city, address, zipcode, latitude, and longitude)
+    $args['meta_query'] = array(
+        'relation' => 'OR', // Relation OR allows multiple conditions
+        array(
+            'key'     => 'city', // ACF field for city
+            'value'   => $addressAPI,
+            'compare' => 'LIKE', // Use LIKE for partial matches
+        ),
+        array(
+            'key'     => 'state', // ACF field for city
+            'value'   => $addressAPI,
+            'compare' => 'LIKE', // Use LIKE for partial matches
+        ),
+        array(
+            'key'     => 'address', // ACF field for address
+            'value'   => $addressAPI,
+            'compare' => 'LIKE', // Use LIKE for partial matches
+        ),
+        array(
+            'key'     => 'zip_code', // ACF field for zip code
+            'value'   => $addressAPI,
+            'compare' => 'LIKE', // Use LIKE for partial matches
+        ),
+        array(
+            'key'     => 'latitude', // ACF field for latitude
+            'value'   => $addressAPI,
+            'compare' => 'LIKE', // Use LIKE for partial matches
+        ),
+        array(
+            'key'     => 'longitude', // ACF field for longitude
+            'value'   => $addressAPI,
+            'compare' => 'LIKE', // Use LIKE for partial matches
+        ),
+    );
+
+    // Query to fetch posts
+    $query = new WP_Query($args);
+
+    // Prepare an array to hold markers and HTML list
+    $markers = array();
+    $dealer_list_html = '';
+
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $latitude = get_field('latitude');
+            $longitude = get_field('longitude');
+            $address = get_field('address');
+            $city = get_field('city');
+            $state = get_field('state');
+            $zip_code = get_field('zip_code');
+
+            // Only add the marker if latitude and longitude are available
+            if ($latitude && $longitude) {
+                $markers[] = array(
+                    'lat' => $latitude,
+                    'lng' => $longitude,
+                    'title' => get_the_title(),
+                    'address' => $address,
+                    'city' => $city,
+                    'state' => $state,
+                );
+            }
+
+            // Build the dealer list HTML
+            $dealer_list_html .= '<li>';
+            $dealer_list_html .= '<h2>' . get_the_title() . '</h2>';
+            $dealer_list_html .= '<p>' . get_the_excerpt() . '</p>';
+            $dealer_list_html .= '<p>City: ' . $city . '</p>';
+            $dealer_list_html .= '<p>State: ' . $state . '</p>';
+            $dealer_list_html .= '<p>Zipcode: ' . $zip_code . '</p>';
+            $dealer_list_html .= '<p>Address: ' . $address . '</p>';
+            $dealer_list_html .= '<p>Latitude: ' . $latitude . '</p>';
+            $dealer_list_html .= '<p>Longitude: ' . $longitude . '</p>';
+            $dealer_list_html .= '</li>';
+        }
+    }
+
+    wp_reset_postdata();
+
+    // Send the response with both markers and dealer list HTML
+    if (!empty($markers)) {
+        wp_send_json_success(array(
+            'markers' => $markers,
+            'dealer_list_html' => $dealer_list_html,
+        ));
+    } else {
+        wp_send_json_error('No Dealers found.');
+    }
+
+    die();
+}
+
+add_action('wp_ajax_load_google_map_by_api', 'ajax_load_google_map_by_api');
+add_action('wp_ajax_nopriv_load_google_map_by_api', 'ajax_load_google_map_by_api');
